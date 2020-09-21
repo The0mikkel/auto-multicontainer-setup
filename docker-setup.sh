@@ -178,21 +178,9 @@ for (( i=1; i<=$webserverCount; i++ )) do #Create .env file for domain
                         echo "This must be an url to a folder containing 'apache2.conf', 'default-host.conf', 'evasive.conf', 'security2.conf':"
                         read serverConfigLocation
                         echo "configLink=$serverConfigLocation" >> $gitdir/docker/env/lamp/$envFile
-
-                        echo ""
-                        echo "Is this a privat GitHub repository?"
-                        read privateRepository
-                        if [[ $customConfig == "y" || $customConfig == "Y" ]]; then
-                            echo "Please provide personal access token, for the program to access the files:"
-                            read githubToken
-                            echo "GITHUBTOKEN=$githubToken" >> $gitdir/docker/env/lamp/$envFile
-                        else 
-                            echo "GITHUBTOKEN=" >> $gitdir/docker/env/lamp/$envFile
-                        fi
                     else
                         echo "Using default apache and php configuration..."
                         echo "configLink='https://raw.githubusercontent.com/The0mikkel/auto-multicontainer-setup/master/configuration/lamp'" >> $gitdir/docker/env/lamp/$envFile
-                        echo "GITHUBTOKEN=" >> $gitdir/docker/env/lamp/$envFile
                     fi
 
                 else 

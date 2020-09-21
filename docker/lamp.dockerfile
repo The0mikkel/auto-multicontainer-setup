@@ -6,28 +6,25 @@ ARG VIRTUAL_PORT=80
 ARG LETSENCRYPT_HOST=localhost
 ARG LETSENCRYPT_EMAIL=test@test.com
 ARG ServerName=localhost
-ARG GITHUBTOKEN
 ARG configLink=https://raw.githubusercontent.com/The0mikkel/auto-multicontainer-setup/master/configuration/lamp
 ENV VIRTUAL_HOST=$VIRTUAL_HOST
 ENV VIRTUAL_PORT=$VIRTUAL_PORT
 ENV LETSENCRYPT_HOST=$LETSENCRYPT_HOST
 ENV LETSENCRYPT_EMAIL=$LETSENCRYPT_EMAIL
 ENV ServerName=$ServerName
-ENV GITHUBTOKEN=$GITHUBTOKEN
 ENV configLink=$configLink
 
-RUN apt-get update -y && apt-get upgrade -y
+RUN apt-get update -y
 # Mod security - https://www.linode.com/docs/web-servers/apache-tips-and-tricks/configure-modsecurity-on-apache/
 RUN apt-get install libapache2-mod-security2 libapache2-mod-evasive git curl -y ;\
 mv /etc/modsecurity/modsecurity.conf-recommended /etc/modsecurity/modsecurity.conf ;\
 sed -i "s/SecRuleEngine DetectionOnly/SecRuleEngine On/" /etc/modsecurity/modsecurity.conf ; \
 sed -i "s/SecResponseBodyAccess On/SecResponseBodyAccess Off/" /etc/modsecurity/modsecurity.conf ;
 # Apache setup
-RUN random=$(date +%s) ; \
-curl -L -s -H "Authorization: token ${GITHUBTOKEN}" -H 'Cache-Control: no-cache' "${configLink}/security2.conf?$random" > /etc/apache2/mods-available/security2.conf ; \
-curl -L -s -H "Authorization: token ${GITHUBTOKEN}" -H 'Cache-Control: no-cache' "${configLink}/evasive.conf?$random"> /etc/apache2/mods-enabled/evasive.conf ; \
-curl -L -s -H "Authorization: token ${GITHUBTOKEN}" -H 'Cache-Control: no-cache' "${configLink}/default-host.conf?$random" > /etc/apache2/sites-available/000-default.conf ; \
-curl -L -s -H "Authorization: token ${GITHUBTOKEN}" -H 'Cache-Control: no-cache' "${configLink}/apache2.conf?$random" > /etc/apache2/apache2.conf ; \
+RUN curl -L -s -H 'Cache-Control: no-cache' "${configLink}/security2.conf" > /etc/apache2/mods-available/security2.conf ; \
+curl -L -s -H 'Cache-Control: no-cache' "${configLink}/evasive.conf"> /etc/apache2/mods-enabled/evasive.conf ; \
+curl -L -s -H 'Cache-Control: no-cache' "${configLink}/default-host.conf" > /etc/apache2/sites-available/000-default.conf ; \
+curl -L -s -H 'Cache-Control: no-cache' "${configLink}/apache2.conf" > /etc/apache2/apache2.conf ; \
 a2enmod security2 ; \
 a2enmod evasive ; \
 a2enmod headers ;\
