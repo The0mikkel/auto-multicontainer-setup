@@ -1,0 +1,30 @@
+version: '3.6'
+
+services:
+  lamp_server:
+    build:
+      context: .
+      dockerfile: dockerfile
+      args:
+        VIRTUAL_HOST: ${VIRTUAL_HOST}
+        VIRTUAL_PORT: ${VIRTUAL_PORT}
+        LETSENCRYPT_HOST: ${LETSENCRYPT_HOST}
+        LETSENCRYPT_EMAIL: ${LETSENCRYPT_EMAIL}
+        ServerName: ${ServerName}
+        GITHUBTOKEN: ${GITHUBTOKEN} 
+        configLink: ${configLink}
+    restart: always
+    container_name: $ServerName
+    volumes:
+      - "./app:/app"
+      - "./mysql:/var/lib/mysql"
+    environment: 
+      - LOG_LEVEL=error
+    expose:
+      - 80
+
+networks:
+  default:
+    external:
+      name: nginx-proxy
+
