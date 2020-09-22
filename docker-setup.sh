@@ -277,7 +277,6 @@ for (( i=1; i<=$webserverCount; i++ )) do #Create .env file for domain
 
             env_file=".env"
             cp $gitdir/docker/env/wp/default-wp.env $web_dir/$domain/$env_file
-            cp $gitdir/configuration/wp/Makefile $web_dir/$domain/Makefile
 
             echo "What is the project name? (Must be lower-case, no spaces and no invalid path chars)"
             read project_name
