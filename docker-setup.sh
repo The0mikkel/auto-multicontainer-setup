@@ -329,6 +329,8 @@ for (( i=1; i<=$webserverCount; i++ )) do #Create .env file for domain
             # --------------------------------------------------------------------------
             sed -i -e "s/https:\/\/www.change-me-with-your-domain.com/$url/" $compose_file
 
+            sed -i -e "s/\$(WORDPRESS_WEBSITE_TITLE)/\"\$(WORDPRESS_WEBSITE_TITLE)\"/" wpcli/Makefile
+
             cd $gitdir
             echo ""
             echo "$phpmyadmin_url"
@@ -342,7 +344,8 @@ for (( i=1; i<=$webserverCount; i++ )) do #Create .env file for domain
             echo -e "${YELLOW}This may take som time...$NC"
             echo ""
             cd $web_dir/$domain
-            docker-compose build && docker-compose up -d && docker-compose run --rm healthcheck && dockerSucess=true
+            # docker-compose build && docker-compose up -d && docker-compose run --rm healthcheck && dockerSucess=true
+            docker-compose up -d --build && docker-compose -f docker-compose.yml -f wp-auto-config.yml run --rm wp-auto-config && dockerSucess=true
             cd $gitdir
             if [[ $dockerSucess == true ]]; then
                 echo ""
