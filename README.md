@@ -2,6 +2,8 @@
 Auto multicontainer script, that can easily setup multiple webservers on one server, with the help of a nginx reverse proxy.
 The script is currently supporting lamp and wp installations.
 
+***This software has only been tested on debian***
+
 ## Sources
 This script is based of severel other repositories, that have been automated in a singel bash script.<br>
 Sources:<br>
@@ -12,6 +14,18 @@ Lamp stack:<br>
 [Mattrayner (Dockerhub)](https://hub.docker.com/r/mattrayner/lamp)<br>
 
 ## How to run it
+### Prerequisites
+#### Needed software
+To run this script, you need to have the following softwares installed
+- Git
+- Docker
+- curl
+
+These can be downloaded with the following command:<br>
+*ubuntu/debian:*
+```bash
+sudo apt-get install git docker curl -y
+```
 ### Cloning code
 To download the code, use the following code:<br>
 ```bash
