@@ -25,8 +25,6 @@ RUN curl -L -s -H 'Cache-Control: no-cache' "${configLink}/security2.conf" > /et
 curl -L -s -H 'Cache-Control: no-cache' "${configLink}/evasive.conf"> /etc/apache2/mods-enabled/evasive.conf ; \
 curl -L -s -H 'Cache-Control: no-cache' "${configLink}/default-host.conf" > /etc/apache2/sites-available/000-default.conf ; \
 curl -L -s -H 'Cache-Control: no-cache' "${configLink}/apache2.conf" > /etc/apache2/apache2.conf ; \
-a2enmod security2 ; \
-a2enmod evasive ; \
 a2enmod headers ;\
 mkdir /var/log/mod_evasive ;\
 chown -R www-data:www-data /var/log/mod_evasive
@@ -35,4 +33,4 @@ RUN phpVersion=$(php -v | tac -r | tail -n 1 | cut -d " " -f 2 | cut -c 1-3); \
 iniLoaction=/etc/php/$phpVersion/apache2/php.ini; \
 curl -L -s https://raw.githubusercontent.com/php/php-src/master/php.ini-production -o iniLoaction; \
 sed -i "s/post_max_size = 10M/post_max_size = 1G/" iniLoaction; \
-sed -i "s/upload_max_filesize = 10M/post_max_size = 264M/" iniLoaction;
+sed -i "s/upload_max_filesize = 10M/upload_max_filesize = 264M/" iniLoaction;
