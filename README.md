@@ -7,7 +7,7 @@ This script is based of severel other repositories, that have been automated in 
 Sources:<br>
 Nginx reverse proxy:<br>
 [Kassambara (Github repository)](https://github.com/kassambara/nginx-multiple-https-websites-on-one-server)<br>
-[Kassambara (Guide)](https://www.datanovia.com/en/lessons/how-host-multiple-https-websites-on-one-server/)<br>
+[Kassambara (Guide)](https://www.datanovia.com/en/lessons/docker-wordpress-production-deployment/)<br>
 Lamp stack:<br>
 [Mattrayner (Dockerhub)](https://hub.docker.com/r/mattrayner/lamp)<br>
 
@@ -79,6 +79,10 @@ The rest of the settings is derived from the domain name of the server.
 After the script has run, the new .env file we be located in `docker/env/lamp/`, with the name of the domain.
 
 When starting this server, you are also building the image for it.
+
+After the webserver has been deployed, please view the log of the container, to insure, that the container is infact running.<br>
+In this log, you will also get the username and password for the standard mysql user.<br>
+**Please write the password down and/or change it shortly after deployment**
 
 #### Inserting files
 
