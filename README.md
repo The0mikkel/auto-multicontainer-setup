@@ -98,6 +98,8 @@ After the webserver has been deployed, please view the log of the container, to 
 In this log, you will also get the username and password for the standard mysql user.<br>
 **Please write the password down and/or change it shortly after deployment**
 
+A phpmyadmin page will be available at `$domain/phpmyadmin`
+
 #### Inserting files
 
 When the server is deployed, the files for the server will be located at `/srv/www/$domain`<br>
@@ -149,6 +151,34 @@ The `configLink`, is the url-address of a folder on a webserver containing `apac
 This is used to fetch apache setup files when building the docker image.
 
 ### WP
+The Wordpress server is based on the `[wordpress:latest](https://hub.docker.com/_/wordpress)`, but is setup after the [Docker WordPress Production Deployment](https://www.datanovia.com/en/lessons/docker-wordpress-production-deployment/) guide by Alboukadel Kassambara.
+
+The script downloads the [wordpress-docker-compose](https://github.com/kassambara/wordpress-docker-compose) GitHub repository, and replaces the standard `docker-compose.yml` with a modified `docker-compose.yml` that have "redirectnonwww" container removed, as well as replacing the `ports` with `exposed` in the phpmyadmin container, for it to work better with multiple wordpress servers running.
+
+
+The script will ask multiple questions, to setup the wordpress installation.
+
+These are the following:
+- Projekt name
+- User name
+- User password
+- Email
+- Website title
+- Subdomain / Prefix for phpmyadmin page
+
+After the user has given the right information, the server will setup a .env file in the given directory for the wordpress installation (`/srv/www/$domain`).<br>
+This .env file can then be inspected by the user, before the software continues, to ensure that all information is given correctly.<br>
+This is for the most part not necessary.
+
+When the webserver is launched, then the user should go to the webservers domain to finish the Wordpress setup.<br>
+This include, but limited to, username and password for Wordpress.
+
+The install of the server is currently manual, due to an error when trying to run the automated script.<br>
+This may be fixed on a later date.
+
+The phpmyadmin will be available on the `$prefix.$domain` url.
+
+At this point the wordpress install should be ready to use.
 
 ## Disclaimer
 I am in no way a professionel in any of the fields this software works with, and there may be bugs and security issues in the provided software.<br>
