@@ -1,8 +1,7 @@
 #!/bin/bash
 # If following error is sent: /bin/bash^M - use sed -i -e 's/\r$//' docker-setup.sh 
-#temp command
-# sudo rm -R /srv/www
 
+# Variables
 gitdir=$(pwd)
 
 GREEN='\033[0;32m' # Green color for use in echo
@@ -11,10 +10,10 @@ BLUE='\033[1;34m' # Green color for use in echo
 RED='\033[0;31m' # Red color for use in echo
 NC='\033[0m' # No Color for use in echo
 
-echo "setting up directory"
-echo ""
-# Variables
 web_dir=/srv/www
+
+echo "setting up directory ($web_dir)"
+echo ""
 # Creates directory
 ### Check if a directory does not exist ###
 if [ ! -d $web_dir ] 
@@ -40,24 +39,25 @@ then
     echo "Directory permission is set."
 else
     echo "Directory already created."
-    echo "Is persmission set? [Y]"
-    read input
-    if [[ $input == "n" || $input == "N" ]]; then
-        echo "Directory permission is not set."
-        echo "Setting directory permissions. (The following actions use sudo. To prevent the use of sudo, please setup '$web_dir' before running this program again)"
+    # Old section that ask if permission is set. This may be activated later.
+    # echo "Is persmission set? [Y]" 
+    # read input
+    # if [[ $input == "n" || $input == "N" ]]; then
+    #     echo "Directory permission is not set."
+    #     echo "Setting directory permissions. (The following actions use sudo. To prevent the use of sudo, please setup '$web_dir' before running this program again)"
 
-        # 2. set your user as the owner
-        sudo chown -R $myusername $web_dir
-        # 3. set the web server as the group owner
-        sudo chgrp -R www-data $web_dir
-        # 4. 755 permissions for everything
-        sudo chmod -R 755 $web_dir
-        # 5. New files and folders inherit 
-        # group ownership from the parent folder
-        chmod g+s $web_dir
+    #     # 2. set your user as the owner
+    #     sudo chown -R $myusername $web_dir
+    #     # 3. set the web server as the group owner
+    #     sudo chgrp -R www-data $web_dir
+    #     # 4. 755 permissions for everything
+    #     sudo chmod -R 755 $web_dir
+    #     # 5. New files and folders inherit 
+    #     # group ownership from the parent folder
+    #     chmod g+s $web_dir
 
-        echo "Directory permission is set."
-    fi
+    #     echo "Directory permission is set."
+    # fi
 fi
 
 if [[ ! "$(docker ps -q -f name=nginx)" && ! "$(docker ps -q -f name=nginx-gen)" && ! "$(docker ps -q -f name=nginx-letsencrypt)" ]]; then
@@ -66,11 +66,14 @@ if [[ ! "$(docker ps -q -f name=nginx)" && ! "$(docker ps -q -f name=nginx-gen)"
 
     if [ -d $web_dir/nginx-reverse-proxy ]; then 
         echo "A previus nginx proxy installation is already located in $web_dir. To setup a new nginx reverse proxy, the old installetion needs to be removed."
+        echo "Press enter to continue"
+        read test
         echo "Removing nginx reverse proxy... (This action is using sudo. To prevent use of sudo, quit action and delete direcoroty '$web_dir/nginx-reverse-proxy' before running this program again)"
         sudo rm -R $web_dir/nginx-reverse-proxy
     fi
+    echo ""
     mkdir $web_dir/nginx-reverse-proxy
-
+    echo "Donloading files..."
     # Download a nginx-proxy template
     git clone https://github.com/kassambara/nginx-multiple-https-websites-on-one-server $web_dir/nginx-reverse-proxy
 
