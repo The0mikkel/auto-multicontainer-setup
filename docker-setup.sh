@@ -102,7 +102,7 @@ if [[ ! "$(docker ps -q -f name=nginx)" && ! "$(docker ps -q -f name=nginx-gen)"
     # nginx, nginx-gen and nginx-letsencrypt containers
     cd $web_dir/nginx-reverse-proxy/nginx-proxy/
     docker-compose up -d
-    cd $gitdir
+    cd /$gitdir
 
     echo ""
     echo -e "${GREEN}Nginx proxy have been deployed!${NC}"
@@ -197,8 +197,8 @@ for (( i=1; i<=$webserverCount; i++ )) do #Create .env file for domain
             echo "Setting up folder for $domain"
             if [ ! -d $web_dir/$domain ]; then mkdir $web_dir/$domain; fi
             echo "Copying docker files and configuration file..."
-            cp $gitdir/docker/lamp.docker-compose.yml $web_dir/$domain/docker-compose.yml
-            cp $gitdir/docker/lamp.dockerfile $web_dir/$domain/dockerfile
+            cp $gitdir/docker/lamp/lamp.docker-compose.yml $web_dir/$domain/docker-compose.yml
+            cp $gitdir/docker/lamp/lamp.dockerfile $web_dir/$domain/dockerfile
             cp $envFileLocation $web_dir/$domain/.env
             if [ ! -d $web_dir/$domain/app/ ]; then 
                 echo "Creating directories for app..."
@@ -222,7 +222,7 @@ for (( i=1; i<=$webserverCount; i++ )) do #Create .env file for domain
             echo -e "${BLUE}Building image and deploying webserver/container${NC}"
             cd $web_dir/$domain
             docker-compose --log-level CRITICAL up -d --build && dockerSucess=true
-            cd $gitdir
+            cd /$gitdir
             echo ""
             echo "cleaning up after docker setup"
             echo "Removing configuration file..."
@@ -236,7 +236,6 @@ for (( i=1; i<=$webserverCount; i++ )) do #Create .env file for domain
         ;;
         wp) #Needs a way to reset folder, when new container is being set up
             # This setup is mainly comming from this blog post: https://www.datanovia.com/en/lessons/docker-wordpress-production-deployment/
-            # echo "This is still being worked on..."
             echo -e "${BLUE}Setting up Wordpress webserver $NC"
             echo ""
             if [ -d $web_dir/$domain ]; then 
@@ -249,6 +248,7 @@ for (( i=1; i<=$webserverCount; i++ )) do #Create .env file for domain
                     sudo rm -R $web_dir/$domain
                     echo "Remove complete"
                     echo ""
+                    mkdir -p $web_dir/$domain/
                 else
                     echo ""
                     echo -e "${RED}Webserver setup at $domain have been skiped, due to an error!${NC}"
@@ -257,22 +257,28 @@ for (( i=1; i<=$webserverCount; i++ )) do #Create .env file for domain
                     continue
                 fi
                 
+            else 
+                mkdir -p $web_dir/$domain/
             fi
 
-            git clone https://github.com/kassambara/wordpress-docker-compose $web_dir/$domain
-            cp $gitdir/docker/wp.docker-compose.yml $web_dir/$domain/docker-compose.yml
+            cd $web_dir/$domain/
 
-            cd $web_dir/$domain
+            # Copying needed files
+            compose_file="docker-compose.yml"
+            auto_compose_file="wp-auto-config.yml"
+            cp $gitdir/docker/wp/wp.docker-compose.yml docker-compose.yml
+            cp $gitdir/docker/wp/wp.auto-config.yml wp-auto-config.yml
+
+            mkdir -p mysql
+            mkdir -p wordpress
+
+            cp -r $gitdir/configuration/wp/wpcli .
+            cp -r $gitdir/configuration/wp/config .
 
             env_file=".env"
-            compose_file="docker-compose.yml"
-            mkdir -p _trash
-            cp $env_file _trash/$env_file
-            # Download initial version
-            rm -rf $env_file
-            curl -s https://raw.githubusercontent.com/kassambara/wordpress-docker-compose/master/.env > $env_file
+            cp $gitdir/docker/env/wp/default-wp.env $web_dir/$domain/$env_file
+            cp $gitdir/configuration/wp/Makefile $web_dir/$domain/Makefile
 
-            echo ""
             echo "What is the project name? (Must be lower-case, no spaces and no invalid path chars)"
             read project_name
             echo ""
@@ -329,9 +335,6 @@ for (( i=1; i<=$webserverCount; i++ )) do #Create .env file for domain
             # --------------------------------------------------------------------------
             sed -i -e "s/https:\/\/www.change-me-with-your-domain.com/$url/" $compose_file
 
-            sed -i -e "s/\$(WORDPRESS_WEBSITE_TITLE)/\"\$(WORDPRESS_WEBSITE_TITLE)\"/" wpcli/Makefile
-
-            cd $gitdir
             echo ""
             echo "$phpmyadmin_url"
             echo ""
@@ -343,10 +346,10 @@ for (( i=1; i<=$webserverCount; i++ )) do #Create .env file for domain
             echo -e "${BLUE}Building image and deploying webserver/container${NC}"
             echo -e "${YELLOW}This may take som time...$NC"
             echo ""
-            cd $web_dir/$domain
+
             # docker-compose build && docker-compose up -d && docker-compose run --rm healthcheck && dockerSucess=true
             docker-compose up -d --build && docker-compose -f docker-compose.yml -f wp-auto-config.yml run --rm wp-auto-config && dockerSucess=true
-            cd $gitdir
+            cd /$gitdir
             if [[ $dockerSucess == true ]]; then
                 echo ""
                 echo -e "${YELLOW}The wordpress installation, is installed maually. Please keep in mind that you have to setup wordpress at $domain $NC"
