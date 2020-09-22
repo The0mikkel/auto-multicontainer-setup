@@ -173,12 +173,11 @@ This is for the most part not necessary.
 When the webserver is launched, then the user should go to the webservers domain to finish the Wordpress setup.<br>
 This include, but limited to, username and password for Wordpress.
 
-The install of the server is currently manual, due to an error when trying to run the automated script.<br>
-This may be fixed on a later date.
+The install of the server is currently only automatic, so that the website is setup and configured when going live.
 
 The phpmyadmin will be available on the `$prefix.$domain` url.
 
-At this point the wordpress install should be ready to use.
+At this point the wordpress install should be ready to use, just log ind with the cridentials provided doing install.
 
 ## Disclaimer
 I am in no way a professionel in any of the fields this software works with, and there may be bugs and security issues in the provided software.<br>
