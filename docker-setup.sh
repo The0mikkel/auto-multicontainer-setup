@@ -133,14 +133,14 @@ for (( i=1; i<=$webserverCount; i++ )) do #Create .env file for domain
     read domain # a check if domain exist is needed
     echo ""
     while true; do
-        echo "What type of webserver do you need? (lamp, nginx, wp)"
+        echo "What type of webserver do you need? (lamp, nginx, wp, portainer)"
         read serverType
-        if [[ $serverType == "lamp" || $serverType == "nginx" || $serverType == "wp" ]] ; then
+        if [[ $serverType == "lamp" || $serverType == "nginx" || $serverType == "wp" || $serverType == 'portainer']] ; then
             echo ""
             break
         else
             echo "The provided webserver type is not supported"
-            echo "Supported server types: lamp, nginx, wp"
+            echo "Supported server types: lamp, nginx, wp and portainer"
         fi
     done
 
@@ -353,6 +353,9 @@ for (( i=1; i<=$webserverCount; i++ )) do #Create .env file for domain
                 echo ""
                 echo -e "${YELLOW}The wordpress installation, is installed maually. Please keep in mind that you have to setup wordpress at $domain $NC"
             fi
+        ;;
+        portainer)
+            docker volume create portainer_data && docker run -d -p 8000:8000 -p 9000:9000 --name=portainer --restart=always -v /var/run/docker.sock:/var/run/docker.sock -v portainer_data:/data portainer/portainer-ce && dockerSucess=true
         ;;
     esac
     if [[ $dockerSucess == true ]]; then
