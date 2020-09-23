@@ -351,7 +351,7 @@ for (( i=1; i<=$webserverCount; i++ )) do #Create .env file for domain
             cd /$gitdir
             if [[ $dockerSucess == true ]]; then
                 echo ""
-                echo -e "${YELLOW}The wordpress installation, is installed maually. Please keep in mind that you have to setup wordpress at $domain $NC"
+                echo -e "${YELLOW}The wordpress installation, is installed and conifgured.$NC"
             fi
         ;;
         portainer)
