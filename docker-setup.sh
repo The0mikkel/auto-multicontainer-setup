@@ -129,13 +129,16 @@ done
 
 echo ""
 for (( i=1; i<=$webserverCount; i++ )) do #Create .env file for domain
-    echo "What is the $i. websevers domain (ex. example.com, test.com) (not www.test.com) ?"
-    read domain # a check if domain exist is needed
-    echo ""
     while true; do
         echo "What type of webserver do you need? (lamp, nginx, wp, portainer)"
         read serverType
-        if [[ $serverType == "lamp" || $serverType == "nginx" || $serverType == "wp" || $serverType == 'portainer' ]] ; then
+        if [[ $serverType == "lamp" || $serverType == "nginx" || $serverType == "wp" ]] ; then
+            echo ""
+            echo "What is the $i. websevers domain (ex. example.com, test.com) (not www.test.com) ?"
+            read domain # a check if domain exist is needed
+            echo ""
+            break
+        elif [[ $serverType == 'portainer' ]]; then
             echo ""
             break
         else
@@ -356,15 +359,16 @@ for (( i=1; i<=$webserverCount; i++ )) do #Create .env file for domain
             # Needed cleanup of directory?
         ;;
         portainer)
-            if [[ ! "$(docker ps -q -f name=portainer)"]]; then
+            if [[ ! "$(docker ps -q -f name=portainer)" ]]; then
                 cd $web_dir/$domain/
                 echo -e "${BLUE}Setting up Portainer$NC"
                 echo ""
-                docker volume create portainer_data && docker run -d -p 8000:8000 -p 9000:9000 --name=portainer --restart=always -v /var/run/docker.sock:/var/run/docker.sock -v portainer_data:/data portainer/portainer-ce && dockerSucess=true
+                docker volume create portainer_data && docker run -d -p 8000:8000 -p 9000:9000 --name=portainer --restart=always -v /var/run/docker.sock:/var/run/docker.sock -v portainer_data:/data portainer/portainer-ce && dockerSucess=portainer
                 cd /$gitdir
             else 
                 echo -e "${RED}Portainer is already running!"
                 echo "Please remove the current running Portainer container, before trying to setup a new instance"
+                dockerSucess=customError
             fi
         ;;
     esac
@@ -373,15 +377,15 @@ for (( i=1; i<=$webserverCount; i++ )) do #Create .env file for domain
         echo -e "${GREEN}Webserver at $domain have been deployed!${NC}"
         echo "---------------------------------------------------------"
         echo ""
-    elif [[ $dockerSucess == 'portainer' ]]
+    elif [[ $dockerSucess == 'portainer' ]]; then
         echo ""
         echo -e "${GREEN}Portainer have been deployed, and can be accessed through localip:9000${NC}"
         echo "---------------------------------------------------------"
         echo ""
-    elif [[ $dockerSucess == 'customError' ]]
+    elif [[ $dockerSucess == 'customError' ]]; then
         echo ""
-        echo -e "${YELLOW}The webserver you were trying to setup threw a error message.${NC}"
-        echo -e "${YELLOW}Continuing.${NC}"
+        echo -e "${YELLOW}The webserver you were trying to setup threw an error message.${NC}"
+        echo -e "${YELLOW}Continuing${NC}"
         echo "---------------------------------------------------------"
         echo ""
     else 
