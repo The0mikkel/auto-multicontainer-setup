@@ -135,7 +135,7 @@ for (( i=1; i<=$webserverCount; i++ )) do #Create .env file for domain
     while true; do
         echo "What type of webserver do you need? (lamp, nginx, wp, portainer)"
         read serverType
-        if [[ $serverType == "lamp" || $serverType == "nginx" || $serverType == "wp" || $serverType == 'portainer']] ; then
+        if [[ $serverType == "lamp" || $serverType == "nginx" || $serverType == "wp" || $serverType == 'portainer' ]] ; then
             echo ""
             break
         else
@@ -353,14 +353,35 @@ for (( i=1; i<=$webserverCount; i++ )) do #Create .env file for domain
                 echo ""
                 echo -e "${YELLOW}The wordpress installation, is installed and conifgured.$NC"
             fi
+            # Needed cleanup of directory?
         ;;
         portainer)
-            docker volume create portainer_data && docker run -d -p 8000:8000 -p 9000:9000 --name=portainer --restart=always -v /var/run/docker.sock:/var/run/docker.sock -v portainer_data:/data portainer/portainer-ce && dockerSucess=true
+            if [[ ! "$(docker ps -q -f name=portainer)"]]; then
+                cd $web_dir/$domain/
+                echo -e "${BLUE}Setting up Portainer$NC"
+                echo ""
+                docker volume create portainer_data && docker run -d -p 8000:8000 -p 9000:9000 --name=portainer --restart=always -v /var/run/docker.sock:/var/run/docker.sock -v portainer_data:/data portainer/portainer-ce && dockerSucess=true
+                cd /$gitdir
+            else 
+                echo -e "${RED}Portainer is already running!"
+                echo "Please remove the current running Portainer container, before trying to setup a new instance"
+            fi
         ;;
     esac
     if [[ $dockerSucess == true ]]; then
         echo ""
         echo -e "${GREEN}Webserver at $domain have been deployed!${NC}"
+        echo "---------------------------------------------------------"
+        echo ""
+    elif [[ $dockerSucess == 'portainer' ]]
+        echo ""
+        echo -e "${GREEN}Portainer have been deployed, and can be accessed through localip:9000${NC}"
+        echo "---------------------------------------------------------"
+        echo ""
+    elif [[ $dockerSucess == 'customError' ]]
+        echo ""
+        echo -e "${YELLOW}The webserver you were trying to setup threw a error message.${NC}"
+        echo -e "${YELLOW}Continuing.${NC}"
         echo "---------------------------------------------------------"
         echo ""
     else 
