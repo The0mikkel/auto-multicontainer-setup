@@ -1,6 +1,6 @@
 # Auto multicontainer setup
 Auto multicontainer script, that can easily setup multiple webservers on one server, with the help of a nginx reverse proxy.
-The script is currently supporting lamp and wp installations.
+The script is currently supporting lamp, wp and Portainer installations.
 
 ***This software has only been tested on Debian, Kali and Ubuntu***
 
