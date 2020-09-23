@@ -179,6 +179,24 @@ The phpmyadmin will be available on the `$prefix.$domain` url.
 
 At this point the wordpress install should be ready to use, just log ind with the cridentials provided doing install.
 
+### Portainer
+It is possible to install [Portainer](https://www.portainer.io/), with this software.
+
+Portainer is a lightweight management UI for Docker, that is easely installed.
+
+This code runs the standard install of Portainer, just for easy of use, when already setting up multiple webservers with this program.
+
+The runned command:
+```bash
+docker volume create portainer_data
+docker run -d -p 8000:8000 -p 9000:9000 --name=portainer --restart=always -v /var/run/docker.sock:/var/run/docker.sock -v portainer_data:/data portainer/portainer-ce
+```
+
+This is all runned in the directory `/srv/www/portainer`
+
+It is only possible to run this install once, when the container is running.<br>
+If the container is not running, the software will try to install the container.
+
 ## Disclaimer
 I am in no way a professionel in any of the fields this software works with, and there may be bugs and security issues in the provided software.<br>
 I will to some extend try to keep this code maintained, but this software is provided as is, and should be looked through before use.<br>
