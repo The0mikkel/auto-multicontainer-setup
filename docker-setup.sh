@@ -130,7 +130,7 @@ done
 echo ""
 for (( i=1; i<=$webserverCount; i++ )) do #Create .env file for domain
     while true; do
-        echo "What type of webserver do you need? (lamp, nginx, wp, portainer)"
+        echo "What type of webserver do you need? (lamp, nginx, wp, portainer, openvpn)"
         read serverType
         if [[ $serverType == "lamp" || $serverType == "nginx" || $serverType == "wp" ]] ; then
             echo ""
@@ -138,7 +138,7 @@ for (( i=1; i<=$webserverCount; i++ )) do #Create .env file for domain
             read domain # a check if domain exist is needed
             echo ""
             break
-        elif [[ $serverType == 'portainer' ]]; then
+        elif [[ $serverType == 'portainer' || $serverType == "openvpn" ]]; then
             echo ""
             break
         else
@@ -360,14 +360,33 @@ for (( i=1; i<=$webserverCount; i++ )) do #Create .env file for domain
         ;;
         portainer)
             if [[ ! "$(docker ps -q -f name=portainer)" ]]; then
-                cd $web_dir/portainer/
                 echo -e "${BLUE}Setting up Portainer$NC"
                 echo ""
+                mkdir $web_dir/portainer/
+                cd $web_dir/portainer/
                 docker volume create portainer_data && docker run -d -p 8000:8000 -p 9000:9000 --name=portainer --restart=always -v /var/run/docker.sock:/var/run/docker.sock -v portainer_data:/data portainer/portainer-ce && dockerSucess=portainer
                 cd /$gitdir
             else 
                 echo -e "${RED}Portainer is already running!"
                 echo "Please remove the current running Portainer container, before trying to setup a new instance"
+                dockerSucess=customError
+            fi
+        ;;
+        openvpn)
+            if [[ ! "$(docker ps -q -f name=openvpn-as)" ]]; then
+                echo -e "${BLUE}Setting up Openvpn$NC"
+                echo ""
+                if [ -d $web_dir/openvpn ]; then
+                    mkdir $web_dir/openvpn/
+                fi
+                cd $web_dir/openvpn/
+                cp /$gitdir/docker/openVpn/docker-compose.yml docker-compose.yml
+                docker-compose up -d --build
+                dockerSucess=openvpn
+                cd /$gitdir
+            else 
+                echo -e "${RED}OpenVpn is already running!"
+                echo "Please remove the current running openVpn container, before trying to setup a new instance"
                 dockerSucess=customError
             fi
         ;;
@@ -380,6 +399,11 @@ for (( i=1; i<=$webserverCount; i++ )) do #Create .env file for domain
     elif [[ $dockerSucess == 'portainer' ]]; then
         echo ""
         echo -e "${GREEN}Portainer have been deployed, and can be accessed through localip:9000${NC}"
+        echo "---------------------------------------------------------"
+        echo ""
+    elif [[ $dockerSucess == 'openvpn' ]]; then
+        echo ""
+        echo -e "${GREEN}OpenVpn have been deployed, and can be accessed through localip:943${NC}"
         echo "---------------------------------------------------------"
         echo ""
     elif [[ $dockerSucess == 'customError' ]]; then
