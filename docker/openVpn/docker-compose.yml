@@ -17,4 +17,4 @@ services:
       - 9443:9443
       - 1194:1194/udp
     restart: unless-stopped
-    command: ["start", "--net=host", "--privileged"]
+    # command: ["start", "--net=host", "--privileged"]
