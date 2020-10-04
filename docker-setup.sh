@@ -376,12 +376,23 @@ for (( i=1; i<=$webserverCount; i++ )) do #Create .env file for domain
             if [[ ! "$(docker ps -q -f name=openvpn-as)" ]]; then
                 echo -e "${BLUE}Setting up Openvpn$NC"
                 echo ""
-                if [ -d $web_dir/openvpn ]; then
-                    mkdir $web_dir/openvpn/
+                if [ ! -d $web_dir/openvpn ]; then
+                    mkdir $web_dir/openvpn
+                fi
+                if [ ! -d $web_dir/openvpn/config ]; then
+                    mkdir $web_dir/openvpn/config
                 fi
                 cd $web_dir/openvpn/
                 cp /$gitdir/docker/openVpn/docker-compose.yml docker-compose.yml
                 docker-compose up -d --build
+                # sudo docker create --name=openvpn-as \
+                # --restart=always \
+                # -v $web_dir/openvpn/config:/config \
+                # -e INTERFACE=eth0 \
+                # -e PGID=1001 -e PUID=1001 \
+                # -e TZ=Europe/London \
+                # --net=host --privileged \
+                # linuxserver/openvpn-as
                 dockerSucess=openvpn
                 cd /$gitdir
             else 
