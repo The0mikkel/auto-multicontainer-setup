@@ -40,7 +40,7 @@ Use the following code to run the script:
 ```
 
 If you see following error `/bin/bash^M`<br>
-Run following command `sed -i -e 's/\r$//' docker-setup.sh && ./docker-setup.sh`<br>
+Run following command `chmod u+x docker-setup.sh && sed -i -e 's/\r$//' docker-setup.sh && ./docker-setup.sh`<br>
 
 ### The automated script
 The script adds the new webservers in the `/srv/www` directory.<br>
