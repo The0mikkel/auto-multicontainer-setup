@@ -1,0 +1,44 @@
+version: "3.3"
+
+services:
+
+  traefik:
+    image: "traefik:v2.5"
+    container_name: "traefik"
+    command:
+      - "--api=true"
+      - "--api.dashboard=true"
+      - "--providers.docker"
+      - "--entrypoints.web.address=:80"
+      - "--entrypoints.websecure.address=:443"
+      - "--entrypoints.api.address=:8080"
+      - "--certificatesresolvers.letsencryptcert.acme.httpchallenge=true"
+      - "--certificatesresolvers.letsencryptcert.acme.httpchallenge.entrypoint=web"
+      # - "--certificatesresolvers.letsencryptcert.acme.email="
+      - "--certificatesresolvers.letsencryptcert.acme.storage=/letsencrypt/acme.json"
+    ports:
+      - "80:80"
+      - "443:443"
+      - "8080:8080"
+    volumes:
+      - "./letsencrypt:/letsencrypt"
+      - "/var/run/docker.sock:/var/run/docker.sock:ro"
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.traefik.rule=PathPrefix(`/api`) || PathPrefix(`/dashboard`)"
+      - "traefik.http.routers.traefik.entrypoints=api"
+      - "traefik.http.routers.traefik.service=api@internal"
+
+  whoami:
+    image: "traefik/whoami"
+    container_name: "simple-service"
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.whoami.rule=Host(`${DOMAIN}`)"
+      - "traefik.http.routers.whoami.entrypoints=websecure"
+      - "traefik.http.routers.whoami.tls.certresolver=letsencryptcert"
+
+networks:
+  default:
+    external: true
+    name: traefik

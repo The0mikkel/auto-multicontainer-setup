@@ -2,3 +2,4 @@
 !default-lamp.env
 !default-wp.env
 !.env
+!default-traefik.env
