@@ -1,5 +1,5 @@
 # Auto multicontainer setup
-Auto multicontainer script, that can easily setup multiple webservers on one server, with the help of a nginx reverse proxy.
+Auto multicontainer script, that can easily setup multiple webservers on one server in a docker inverionment, with the help of a nginx reverse proxy.
 The script is currently supporting lamp, wp and Portainer installations.
 
 ***This software has only been tested on Debian, Kali and Ubuntu***
@@ -41,6 +41,11 @@ Use the following code to run the script:
 
 If you see following error `/bin/bash^M`<br>
 Run following command `chmod u+x docker-setup.sh && sed -i -e 's/\r$//' docker-setup.sh && ./docker-setup.sh`<br>
+
+#### *Flags*
+Flags can be used to customize the process of the program.
+
+*-d [dir]* | The `d` flag is used to set the directory: `-d /srv/www`
 
 ### The automated script
 The script adds the new webservers in the `/srv/www` directory.<br>

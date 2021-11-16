@@ -1,32 +1,50 @@
 #!/bin/bash
+set -o allexport
+source .env
+set +o allexport
+
+while getopts d: flag
+do
+    case "${flag}" in
+        d) web_dir=${OPTARG};;
+        *)
+    esac
+done
+
 # Script to setup nginx reverse proxy in the web_dir directory
 if [[ ! "$(docker ps -q -f name=nginx)" && ! "$(docker ps -q -f name=nginx-gen)" && ! "$(docker ps -q -f name=nginx-letsencrypt)" ]]; then
     echo ""
     echo -e "${BLUE}setting up nginx reverse proxy $NC"
 
-    if [ -d $web_dir/nginx-reverse-proxy ]; then 
-        echo "A previus nginx proxy installation is already located in $web_dir. To setup a new nginx reverse proxy, the old installetion needs to be removed."
-        echo "Press enter to continue"
-        read test
-        echo "Removing nginx reverse proxy... (This action is using sudo. To prevent use of sudo, quit action and delete direcoroty '$web_dir/nginx-reverse-proxy' before running this program again)"
-        sudo rm -R $web_dir/nginx-reverse-proxy
+    if [ -d ${web_dir}/nginx-reverse-proxy ]; then 
+        echo "A previus nginx proxy installation is already located in ${web_dir} and not running. To setup a new nginx reverse proxy, the old installetion needs to be removed."
+        echo "Do you want to proceed? [y]"
+        read decision
+        if [ decision != "y" ]; then
+
+            echo -e "${YELLOW}Stopping program!${NC}";
+            exit 1;
+
+        fi
+        echo "Removing nginx reverse proxy... (This action is using sudo. To prevent use of sudo, quit action and delete direcoroty '${web_dir}/nginx-reverse-proxy' before running this program again)"
+        sudo rm -R ${web_dir}/nginx-reverse-proxy
     fi
     echo ""
-    mkdir $web_dir/nginx-reverse-proxy
+    mkdir ${web_dir}/nginx-reverse-proxy
     echo "Donloading files..."
     # Download a nginx-proxy template
-    git clone https://github.com/kassambara/nginx-multiple-https-websites-on-one-server $web_dir/nginx-reverse-proxy
+    git clone https://github.com/kassambara/nginx-multiple-https-websites-on-one-server ${web_dir}/nginx-reverse-proxy
 
     # Update nginx.tmpl: Nginx configuration file template
-    rm -rf $web_dir/nginx/nginx-proxy/nginx.tmpl
-    curl -s https://raw.githubusercontent.com/jwilder/nginx-proxy/master/nginx.tmpl> $web_dir/nginx-reverse-proxy/nginx-proxy/nginx.tmpl
+    rm -rf ${web_dir}/nginx/nginx-proxy/nginx.tmpl
+    curl -s https://raw.githubusercontent.com/jwilder/nginx-proxy/master/nginx.tmpl> ${web_dir}/nginx-reverse-proxy/nginx-proxy/nginx.tmpl
 
     # Remove unnecessary files and folders
-    cd $web_dir/nginx-reverse-proxy
+    cd ${web_dir}/nginx-reverse-proxy || ( echo "Error entering nginx-reverse-proxy folder" && exit )
     rm -rf your-website-one.com your-website-two.com README.Rmd README.md .gitignore .Rbuildignore .git
 
     # Adding custom nginx conf
-    cp $gitdir/configuration/nginx-proxy/hardening.conf $web_dir/nginx-reverse-proxy/nginx-proxy/conf.d/hardening.conf
+    cp $gitdir/configuration/nginx-proxy/hardening.conf "${web_dir}"/nginx-reverse-proxy/nginx-proxy/conf.d/hardening.conf
 
     echo ""
     echo -e "${BLUE}starting nginx reverse proxy${NC}"
@@ -40,9 +58,9 @@ if [[ ! "$(docker ps -q -f name=nginx)" && ! "$(docker ps -q -f name=nginx-gen)"
 
     # Creates the reverse proxy with the 
     # nginx, nginx-gen and nginx-letsencrypt containers
-    cd $web_dir/nginx-reverse-proxy/nginx-proxy/
+    cd ${web_dir}/nginx-reverse-proxy/nginx-proxy/ || ( echo "Error entering nginx-reverse-proxy/nginx-proxy folder" && exit )
     docker-compose up -d
-    cd /$gitdir
+    cd /$gitdir || ( echo "Error entering $gitdir folder" && exit )
 
     echo ""
     echo -e "${GREEN}Nginx proxy have been deployed!${NC}"
