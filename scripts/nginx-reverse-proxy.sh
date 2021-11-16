@@ -11,6 +11,14 @@ do
     esac
 done
 
+# Check docker is running and can be accessed
+if docker > /dev/null 2>&1 ; then
+    :
+else
+    echo -e "${YELLOW}Docker is not running.${NC}";
+    exit 1;
+fi
+
 # Script to setup nginx reverse proxy in the web_dir directory
 if [[ ! "$(docker ps -q -f name=nginx)" && ! "$(docker ps -q -f name=nginx-gen)" && ! "$(docker ps -q -f name=nginx-letsencrypt)" ]]; then
     echo ""
@@ -20,7 +28,7 @@ if [[ ! "$(docker ps -q -f name=nginx)" && ! "$(docker ps -q -f name=nginx-gen)"
         echo "A previus nginx proxy installation is already located in ${web_dir} and not running. To setup a new nginx reverse proxy, the old installetion needs to be removed."
         echo "Do you want to proceed? [y]"
         read decision
-        if [ decision != "y" ]; then
+        if [ $decision != "y" ]; then
 
             echo -e "${YELLOW}Stopping program!${NC}";
             exit 1;
@@ -64,9 +72,7 @@ if [[ ! "$(docker ps -q -f name=nginx)" && ! "$(docker ps -q -f name=nginx-gen)"
 
     echo ""
     echo -e "${GREEN}Nginx proxy have been deployed!${NC}"
-    echo "---------------------------------------------------------"
 else 
     echo ""
     echo -e "${YELLOW}Nginx proxy is already deployed!${NC}"
-    echo "---------------------------------------------------------"
 fi

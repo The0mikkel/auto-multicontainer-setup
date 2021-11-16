@@ -27,7 +27,7 @@ then
     if [[ $EUID -ne 0 ]]; then
         echo "This script must be run as root, to setup the folder. Do you want to continue? [y]" 
         read decision
-        if [ decision != "y" ]; then
+        if [ $decision != "y" ]; then
             echo -e "${YELLOW}Stopping program!${NC}";
             exit 1;
         fi

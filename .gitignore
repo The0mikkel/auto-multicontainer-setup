@@ -1,0 +1,4 @@
+*.env
+!default-lamp.env
+!default-wp.env
+!.env
