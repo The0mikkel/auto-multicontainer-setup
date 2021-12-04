@@ -73,7 +73,7 @@ Currently, all webservers and containers in this software is setup to use this r
 The automatic NGINX reverse proxy setup, can be disabled by includeding the flag `-r none`.<br>
 To run the setup, then call: 
 ```bash
-./docker-setup.sh -r=none;
+./docker-setup.sh -r none;
 ```
 
 ### NGINX reverse proxy
@@ -98,7 +98,7 @@ If any of the three nginx-proxy containers are running, the software will assume
 - nginx-proxy-letsencrypt: [acme-companion](https://hub.docker.com/r/nginxproxy/acme-companion)
 - nginx-proxy-fallback: [httpd](https://hub.docker.com/_/httpd)
 
-*All insperation to this setup, has come from [this guide](https://www.datanovia.com/en/lessons/docker-wordpress-production-deployment/).*
+*All inspiration to this setup, has come from [this guide](https://www.datanovia.com/en/lessons/docker-wordpress-production-deployment/).*
 
 ## The webservers
 
