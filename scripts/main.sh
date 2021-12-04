@@ -120,7 +120,7 @@ for (( i=1; i<=$webserverCount; i++ )) do #Create .env file for domain
             echo ""
             echo -e "${BLUE}Building image and deploying webserver/container${NC}"
             cd ${web_dir}/$domain
-            docker-compose --log-level CRITICAL up -d --build && dockerSucess=true
+            docker-compose up -d --build && dockerSucess=true
             cd /$gitdir
             echo ""
             echo "cleaning up after docker setup"

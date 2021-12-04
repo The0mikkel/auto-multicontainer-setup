@@ -13,6 +13,8 @@ Nginx reverse proxy:<br>
 Lamp stack:<br>
 [Mattrayner (Dockerhub)](https://hub.docker.com/r/mattrayner/lamp)<br>
 
+Most of these, has been modified in different ways, to make them more stable and work better with this setup.
+
 ## How to run it
 ### Prerequisites
 #### Needed software
@@ -45,7 +47,8 @@ Run following command `chmod u+x docker-setup.sh && sed -i -e 's/\r$//' docker-s
 #### *Flags*
 Flags can be used to customize the process of the program.
 
-*-d [dir]* | The `d` flag is used to set the directory: `-d /srv/www`
+*-d [dir]* | The `d` flag is used to set the directory: `-d /srv/www`<br>
+*-r [reverse proxy]* | The `r` flag is used to set the reverse proxy: `-r nginx-proxy`
 
 ### The automated script
 The script adds the new webservers in the `/srv/www` directory.<br>
@@ -58,6 +61,44 @@ If a previus folder called "nginx-reverse-proxy" exist and the services "nginx",
 
 After this, you can instert an integer, to say how many webservers you would like to setup.<br>
 And the software will then go through the setup of every webserver.
+
+## Reverse proxy
+
+### Modes
+It is possible to enable and disable auto setup of Reverse proxy.<br>
+The software is currently setup and configured to always add a NGINX reverse proxy, that automaticly detects new containers, and adds them to the reverse proxy.
+
+Currently, all webservers and containers in this software is setup to use this reverse proxy. In the future, other reverse proxies may be added to this software.
+
+The automatic NGINX reverse proxy setup, can be disabled by includeding the flag `-r none`.<br>
+To run the setup, then call: 
+```bash
+./docker-setup.sh -r=none;
+```
+
+### NGINX reverse proxy
+The included reverse proxy, in this software, is a NGINX reverse proxy, that works with a [docker-gen](https://hub.docker.com/r/nginxproxy/docker-gen) to automaticly detect new containers, and register them in the reverse proxy. The main piece of this reverse proxy, is the NGINX proxy, that works with a [template](https://github.com/nginx-proxy/nginx-proxy/blob/main/nginx.tmpl), that from the [docker-gen](https://hub.docker.com/r/nginxproxy/docker-gen) container, is able to build configurations for any new containers coming online, without any downtime.
+
+SSL certificates is handled by the [acme-companion](https://hub.docker.com/r/nginxproxy/acme-companion), which automaticly creates a SSL certificate for routes, that needs them. These certificates are made with "Let's Encrypt", and is automaticly kept up to date. To read more about this, view the GitHub repository for the container: https://github.com/nginx-proxy/acme-companion
+
+All of this, is made by [nginx-proxy](https://github.com/nginx-proxy)
+
+An extension, that this software does, to this stack, is a fallback route, for any requests, that does not have any route. This route is set to be http://fallback.reverse-proxy.localhost, and is made by a httpd container. The content of this webserver, can be found in `./nginx-reverse-proxy directory/fallback.`
+
+The NGINX reverse proxy can be modified after install, in the `./nginx-reverse-proxy directory`
+
+If any existing nginx-reverse-proxy is present, but none of the containers are running, the software will try to reinstall (delete and install) the folder, and any previus setup may be lost.<br>
+Before the software executes this, it asks, if you want to proceed.
+
+If any of the three nginx-proxy containers are running, the software will assume that the proxy is good to go. 
+
+#### [Container list](https://hub.docker.com/u/nginxproxy)
+- nginx-proxy: [NGINX](https://hub.docker.com/_/nginx)
+- nginx-proxy-gen: [Docker-gen](https://hub.docker.com/r/nginxproxy/docker-gen)
+- nginx-proxy-letsencrypt: [acme-companion](https://hub.docker.com/r/nginxproxy/acme-companion)
+- nginx-proxy-fallback: [httpd](https://hub.docker.com/_/httpd)
+
+*All insperation to this setup, has come from [this guide](https://www.datanovia.com/en/lessons/docker-wordpress-production-deployment/).*
 
 ## The webservers
 
