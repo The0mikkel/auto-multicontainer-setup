@@ -16,7 +16,7 @@ services:
         restart: always
         environment:
           VIRTUAL_HOST: ${VIRTUAL_HOST}
-          VIRTUAL_PORT: ${VIRTUAL_PORT}
+          VIRTUAL_PORT: 80
           LETSENCRYPT_HOST: ${LETSENCRYPT_HOST}
           LETSENCRYPT_EMAIL: ${LETSENCRYPT_EMAIL}
           TZ: ${TIMEZONE}
