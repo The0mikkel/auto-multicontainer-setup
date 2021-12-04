@@ -5,7 +5,7 @@ services:
         expose: 
             - 80
         volumes:
-            - ./app:/var/www/html/
+            - ./app:/var/www/html
             - ./conf/apache2.conf:/etc/apache2/apache2.conf
         networks:
             - php-stack-default
@@ -75,7 +75,7 @@ services:
             VIRTUAL_HOST: ${VIRTUAL_HOST_DB_PREFIX}.${VIRTUAL_HOST}
             LETSENCRYPT_HOST: ${VIRTUAL_HOST_DB_PREFIX}.${VIRTUAL_HOST}
             LETSENCRYPT_EMAIL: ${LETSENCRYPT_EMAIL}
-            VIRTUAL_PORT: 8080
+            VIRTUAL_PORT: 80
             
 networks:
     php-stack-default:
