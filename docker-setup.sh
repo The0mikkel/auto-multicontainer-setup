@@ -7,7 +7,7 @@ source .env
 set +o allexport
 
 # Handle flags when program is called
-while getopts d: r: flag
+while getopts "dr" flag
 do
     case "${flag}" in
         d) web_dir=${OPTARG};;
