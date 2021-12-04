@@ -4,6 +4,22 @@ The script is currently supporting lamp, wp and Portainer installations.
 
 ***This software has only been tested on Debian, Kali and Ubuntu***
 
+## Table of contents
+- [Sources](#Sources)
+- [How to run it](#How-to-run-it)
+    - [Prerequisites](#Prerequisites)
+    - [Cloning code](#Cloning-code)
+    - [Running the automated script](#Running-the-automated-script)
+- [Reverse proxy](#Reverse-proxy)
+    - [Modes](#Modes)
+    - [NGINX reverse proxy](#NGINX-reverse-proxy)
+- [The webservers](#The-webservers)
+    - [LAMP](#LAMP)
+    - [PHP-stack](#PHP-stack)
+    - [WP (Wordpress)](#WP)
+    - [Portainer](#Portainer)
+- [Disclaimer](#Disclaimer)
+
 ## Sources
 This script is based of severel other repositories, that have been automated in a singel bash script.<br>
 Sources:<br>
@@ -73,7 +89,7 @@ Currently, all webservers and containers in this software is setup to use this r
 The automatic NGINX reverse proxy setup, can be disabled by includeding the flag `-r none`.<br>
 To run the setup, then call: 
 ```bash
-./docker-setup.sh -r=none;
+./docker-setup.sh -r none;
 ```
 
 ### NGINX reverse proxy
@@ -98,7 +114,7 @@ If any of the three nginx-proxy containers are running, the software will assume
 - nginx-proxy-letsencrypt: [acme-companion](https://hub.docker.com/r/nginxproxy/acme-companion)
 - nginx-proxy-fallback: [httpd](https://hub.docker.com/_/httpd)
 
-*All insperation to this setup, has come from [this guide](https://www.datanovia.com/en/lessons/docker-wordpress-production-deployment/).*
+*All inspiration to this setup, has come from [this guide](https://www.datanovia.com/en/lessons/docker-wordpress-production-deployment/).*
 
 ## The webservers
 
@@ -119,14 +135,12 @@ The default configuration for this script can be located in `configuration/lamp/
 A .env file can be created in the `docker/env/lamp/` folder, with the domain name<br>
 to automate the process.
 The .env file in `docker/env/lamp/` needs to contain the following:<br>
-```
-VIRTUAL_HOST
-VIRTUAL_PORT
-LETSENCRYPT_HOST
-LETSENCRYPT_EMAIL
-ServerName
-configLink
-```
+- VIRTUAL_HOST
+- VIRTUAL_PORT
+- LETSENCRYPT_HOST
+- LETSENCRYPT_EMAIL
+- ServerName
+- configLink
 
 The default values can be seen in the `default-lamp.env`
 
@@ -177,9 +191,9 @@ The `LETSENCRYPT_HOST`, is the url for the webserver (ex. example.com).
 
 This is used to set up the nginx proxy.
 
-##### LETSENCRYPT_HOST
+##### LETSENCRYPT_EMAIL
 
-The `LETSENCRYPT_HOST`, is the email-address used to make the SSL certificate. Therefore this email should be changed.
+The `LETSENCRYPT_EMAIL`, is the email-address used to make the SSL certificate. Therefore this email should be changed.
 
 
 This is used to set up the nginx proxy.
@@ -195,6 +209,85 @@ This is used to set the container name.
 The `configLink`, is the url-address of a folder on a webserver containing `apache2.conf`, `default-host.conf`, `evasive.conf` and `security2`.
 
 This is used to fetch apache setup files when building the docker image.
+
+### PHP-stack
+
+PHP stack is a multicontainer php server, with a custom build [php:apache](https://hub.docker.com/_/php) container, which enables mysqli, apache rewrite and uses defualt php.ini production configuration. Besides the main web container, there is 3 additional containers.<br>
+- [mariadb](https://hub.docker.com/_/mariadb) for database. 
+- [mariadb-cron-backup](https://hub.docker.com/r/fradelg/mysql-cron-backup) is a mysql backup container, that is setup to take a backup of the database every day, at 23:00, and keeps it for 30 days. It compresses it with a GZIP level of 9.
+- [phpmyadmin](https://hub.docker.com/_/phpmyadmin) for easy access to database, when needed. *(It is recomended to keep this stopped, unless activly used)*
+
+#### Folder structure
+
+When the server is deployed, the files for the server will be located at `/srv/www/$domain`<br>
+In this folder there will be two folders. `app`, `mariadb`, `mariadb-backup`, `dump` and `conf`.
+
+##### `app` folder
+The app folder is where all the serverfiles goes.<br>
+In here you will find a `index.html` file, which is just a short demo site.
+
+##### `mariadb` folder
+The `mariadb` folder, is where all the database files goes.<br>
+This means, that the container can be deleted and reinstalled in the same directory, and keep all of the database files.
+
+##### `mariadb-backup` folder
+The `mariadb-backup` folder, is where all the database backup files goes.
+
+##### `dump` folder
+The `dump` folder, is the docker-entrypoint-initdb.d.
+
+##### `conf` folder
+The `conf` folder, is where any configuration of the apache server, is located.<br>
+Here you will find a apache2.conf file, with some preset hardened settings.
+
+#### .env variables
+
+To be able to run this stack, a number of things, need to be known.<br>
+These are all saved in the .env file, that are saved in the
+
+Variables:
+- SERVERNAME
+- VIRTUAL_HOST
+- VIRTUAL_HOST_DB_PREFIX
+- LETSENCRYPT_HOST
+- LETSENCRYPT_EMAIL
+- MYSQL_DATABASE
+- MYSQL_USER
+- MYSQL_PASSWORD
+- MYSQL_ROOT_PASSWORD
+- TIMEZONE
+
+
+##### SERVERNAME
+Servername for the stack. Also used in the names of the containers.<br>
+It is automaticly set to the domain of the new server.
+
+##### VIRTUAL_HOST
+Domain for the new server. This is used for the NGINX reverse proxy.
+
+##### VIRTUAL_HOST_DB_PREFIX
+Domain prefix, for the phpmyadmin page. Used in `$VIRTUAL_HOST_DB_PREFIX.$VIRTUAL_HOST`
+
+##### LETSENCRYPT_HOST
+Domain for the SSL certificat. Should be the same as the domain
+
+##### LETSENCRYPT_EMAIL
+Email connected to the SSL certificat.
+
+##### MYSQL_DATABASE
+Database to be created with the stack.
+
+##### MYSQL_USER
+User to create with the stack.
+
+##### MYSQL_PASSWORD
+Password for the MYSQL_USER.
+
+##### MYSQL_ROOT_PASSWORD
+Root password of the mariadb. Should be very strong.
+
+##### TIMEZONE
+Timezone of the PHP server and the database, to make sure times a synchronized.
 
 ### WP
 The Wordpress server is based on the `[wordpress:latest](https://hub.docker.com/_/wordpress)`, but is setup after the [Docker WordPress Production Deployment](https://www.datanovia.com/en/lessons/docker-wordpress-production-deployment/) guide by Alboukadel Kassambara.

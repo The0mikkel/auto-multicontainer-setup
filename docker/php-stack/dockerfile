@@ -1,0 +1,5 @@
+FROM php:apache
+RUN docker-php-ext-install mysqli
+RUN a2enmod rewrite
+# Use the default production configuration
+RUN mv "$PHP_INI_DIR/php.ini-production" "$PHP_INI_DIR/php.ini"

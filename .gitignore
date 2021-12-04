@@ -3,3 +3,4 @@
 !default-wp.env
 !.env
 !default-traefik.env
+!default-php-stack.env

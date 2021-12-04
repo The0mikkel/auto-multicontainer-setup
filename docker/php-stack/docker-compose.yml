@@ -1,0 +1,84 @@
+version: "3.3"
+services:
+    www:
+        build: .
+        expose: 
+            - 80
+        volumes:
+            - ./app:/var/www/html
+            - ./conf/apache2.conf:/etc/apache2/apache2.conf
+        networks:
+            - php-stack-default
+            - nginx-proxy
+        container_name: ${SERVERNAME}_www
+        depends_on:
+            - mariadb
+        restart: always
+        environment:
+          VIRTUAL_HOST: ${VIRTUAL_HOST}
+          VIRTUAL_PORT: 80
+          LETSENCRYPT_HOST: ${LETSENCRYPT_HOST}
+          LETSENCRYPT_EMAIL: ${LETSENCRYPT_EMAIL}
+          TZ: ${TIMEZONE}
+
+    mariadb:
+        image: mariadb
+        container_name: ${SERVERNAME}_mariadb
+        environment:
+            MYSQL_DATABASE: ${MYSQL_DATABASE}
+            MYSQL_USER: ${MYSQL_USER}
+            MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+            MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+            TZ: ${TIMEZONE}
+        volumes:
+            - ./dump:/docker-entrypoint-initdb.d
+            - ./mariadb:/var/lib/mysql
+        restart: always
+        networks:
+            - php-stack-default
+
+    mariadb-cron-backup:
+        image: fradelg/mysql-cron-backup
+        container_name: ${SERVERNAME}_db_backup
+        depends_on:
+            - mariadb
+        volumes:
+            - ./mariadb-backup:/backup
+        environment:
+            - MYSQL_HOST=mariadb
+            - MYSQL_USER=root
+            - MYSQL_PASS=${MYSQL_ROOT_PASSWORD}
+            - MAX_BACKUPS=30
+            - INIT_BACKUP=1
+            # Every day at 23:00
+            - CRON_TIME=0 23 * * *
+            # Make it small
+            - GZIP_LEVEL=9
+        restart: unless-stopped
+        networks:
+            - php-stack-default
+
+    phpmyadmin:
+        image: phpmyadmin:latest
+        container_name: ${SERVERNAME}_phpmyadmin
+        depends_on: 
+            - mariadb
+        expose: 
+            - 8080
+        networks:
+            - php-stack-default
+            - nginx-proxy
+        restart: always
+        environment:
+            PMA_HOST: mariadb
+            MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+            VIRTUAL_HOST: ${VIRTUAL_HOST_DB_PREFIX}.${VIRTUAL_HOST}
+            LETSENCRYPT_HOST: ${VIRTUAL_HOST_DB_PREFIX}.${VIRTUAL_HOST}
+            LETSENCRYPT_EMAIL: ${LETSENCRYPT_EMAIL}
+            VIRTUAL_PORT: 80
+            
+networks:
+    php-stack-default:
+    nginx-proxy:
+        external:
+            name: nginx-proxy
