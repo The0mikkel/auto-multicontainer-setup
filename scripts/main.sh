@@ -252,14 +252,16 @@ for (( i=1; i<=webserverCount; i++ )) do #Create .env file for domain
             if [[ ! "$(docker ps -q -f name=portainer)" ]]; then
                 echo -e "${BLUE}Setting up Portainer$NC"
                 echo ""
-                if [ -f "${web_dir}/portainer/" ]; then
-                    echo "Portainer exist in some form or another - Aborting"
-                    exit 1;
+                if [ -d "${web_dir}/portainer/" ]; then
+                    echo "Portainer exist in some form or another - Aborting install"
+                    dockerSucess=false
+                else
+                    mkdir "${web_dir}/portainer/"
+                    cp "${gitdir}/docker/portainer/docker-compose.yml" "${web_dir}/portainer/docker-compose.yml"
+                    cd "${web_dir}/portainer/" || exit
+                    docker-compose up -d && dockerSucess=portainer
+                    cd "/${gitdir}" || exit
                 fi
-                mkdir "${web_dir}/portainer/"
-                cd "${web_dir}/portainer/" || exit
-                docker volume create portainer_data && docker run -d -p 8000:8000 -p 9000:9000 --name=portainer --restart=always -v /var/run/docker.sock:/var/run/docker.sock -v portainer_data:/data portainer/portainer-ce && dockerSucess=portainer
-                cd "/${gitdir}" || exit
             else 
                 echo -e "${RED}Portainer is already running!"
                 echo "Please remove the current running Portainer container, before trying to setup a new instance"

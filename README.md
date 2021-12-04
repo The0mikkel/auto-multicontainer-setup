@@ -325,16 +325,10 @@ Portainer is a lightweight management UI for Docker, that is easely installed.
 
 This code runs the standard install of Portainer, just for easy of use, when already setting up multiple webservers with this program.
 
-The runned command:
-```bash
-docker volume create portainer_data
-docker run -d -p 8000:8000 -p 9000:9000 --name=portainer --restart=always -v /var/run/docker.sock:/var/run/docker.sock -v portainer_data:/data portainer/portainer-ce
-```
+A custom docker-compose file is made, with the most basic install of Portainer. This docker-compose file can be inspected in `/docker/portainer/docker-compose.yml`
 
-This is all runned in the directory `/srv/www/portainer`
-
-It is only possible to run this install once, when the container is running.<br>
-If the container is not running, the software will try to install the container.
+This is all runned in the directory `/srv/www/portainer`, and makes it possible to easely update the container.<br>
+This container is not integrated with the NGINX reverse proxy
 
 ## Disclaimer
 I am in no way a professionel in any of the fields this software works with, and there may be bugs and security issues in the provided software.<br>
