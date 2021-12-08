@@ -26,9 +26,9 @@ done
 echo ""
 for (( i=1; i<=webserverCount; i++ )) do #Create .env file for domain
     while true; do
-        echo "What type of webserver do you need? (lamp, nginx, wp, portainer, openvpn, php-stack)"
+        echo "What type of webserver do you need? (lamp, nginx, wp, portainer, openvpn, php-stack, laravel)"
         read -r serverType
-        if [[ $serverType == "lamp" || $serverType == "nginx" || $serverType == "wp" || $serverType == "php-stack" ]] ; then
+        if [[ $serverType == "lamp" || $serverType == "nginx" || $serverType == "wp" || $serverType == "php-stack" || $serverType == "laravel" ]] ; then
             echo ""
             echo "What is the $i. websever domain (ex. example.com, test.com) ?"
             read -r domain # a check if domain exist is needed
@@ -418,6 +418,85 @@ for (( i=1; i<=webserverCount; i++ )) do #Create .env file for domain
             echo ""
             echo -e "${BLUE}Building image and deploying webserver / containers${NC}"
             cd "${web_dir}/${domain}" || exit
+            docker-compose up -d --build && dockerSucess=true
+            cd "/${gitdir}" || exit
+        ;;
+        laravel)            
+            echo "Setting up folder for ${domain}"
+            cd "${web_dir}" || exit
+
+            echo "Running Laravel docker container, to setup default Laravel installation"
+            docker run --rm \
+                -v "$(pwd)":/opt \
+                -w /opt \
+                laravelsail/php81-composer:latest \
+                bash -c "laravel new ${domain} && cd ${domain} && php ./artisan sail:install --with=mysql,redis,meilisearch,mailhog,selenium "
+
+            cd "${web_dir}/${domain}" || exit
+
+            if sudo -n true 2>/dev/null; then
+                sudo chown -R $USER: .
+            else
+                echo -e "${WHITE}Please provide your password so we can make some final adjustments to your application's permissions.${NC}"
+                echo ""
+                sudo chown -R $USER: .
+                echo ""
+                echo -e "${WHITE}Thank you!${NC}"
+            fi
+
+            rm "docker-compose.yml"
+            cp "${gitdir}/docker/laravel/docker-compose.yml" "${web_dir}/${domain}/docker-compose.yml"
+
+            echo ""
+
+            createdEnvFile=".env"
+            echo "We need to setup some things first - Let's get started!"
+            echo ""
+            read -r -p "Please provide a database name to use [leave empty for default]: " databaseName
+            databaseName=${databaseName:-"php"}
+            echo "Setting DB_DATABASE... (${databaseName})"
+            sed -i -e "/DB_DATABASE/s/=${domain}/=${databaseName}/" "${createdEnvFile}"
+            echo ""
+            read -r -p "Please provide a database username to use [leave empty for default]: " databaseUsername
+            databaseUsername=${databaseUsername:-"php"}
+            echo "Setting DB_USERNAME... (${databaseUsername})"
+            sed -i -e "/DB_USERNAME/s/=sail/=${databaseUsername}/" "${createdEnvFile}"
+            echo ""
+            read -r -s -p "Please provide a database user passowrd for ${databaseUsername} to use [leave empty for random]: " databasePassword
+            randomString=$(cat /dev/urandom | tr -dc 'a-zA-Z0-9' | fold -w 32 | head -n 1);
+            databasePassword=${databasePassword:-${randomString}}
+            echo ""
+            echo "Setting DB_PASSWORD..."
+            sed -i -e "/DB_PASSWORD/s/=password/=${databasePassword}/" "${createdEnvFile}"
+            echo ""
+
+            echo " " >> "${createdEnvFile}"
+            echo "Setting server name... (${domain})" 
+            echo "SERVERNAME=${domain}" >> "${createdEnvFile}"
+            echo "Setting VIRTUAL_HOST... (${domain})"
+            echo "VIRTUAL_HOST=${domain}" >> "${createdEnvFile}"
+            echo "Setting LETSENCRYPT_HOST... (${domain})"
+            echo "LETSENCRYPT_HOST=${domain}" >> "${createdEnvFile}"
+            echo ""
+            read -r -p "Please provide a domain prefix for phpmyadmin to use [leave empty for default]: " phpmyadminPrefix
+            phpmyadminPrefix=${phpmyadminPrefix:-phpmyadmin}
+            echo "Setting MYSQL_DATABASE... (${phpmyadminPrefix})"
+            echo "VIRTUAL_HOST_DB_PREFIX=${phpmyadminPrefix}" >> "${createdEnvFile}"
+            echo ""
+            read -r -p "Please provide mail to use for SSL certificat: " sslEmail
+            sslEmail=${sslEmail:-"example@example.com"}
+            echo "Setting LETSENCRYPT_EMAIL... (${sslEmail})"
+            echo "LETSENCRYPT_EMAIL=${sslEmail}" >> "${createdEnvFile}"
+            read -r -p "Please provide a timezone for the webserver [leave empty for system timezone (recommended)]: " timezone
+            systemTimezone=$(cat /etc/timezone)
+            timezone=${timezone:-${systemTimezone}}
+            echo "Setting TIMEZONE... (${timezone})"
+            echo "TIMEZONE=${timezone}" >> "${createdEnvFile}"
+
+            echo ""
+            echo "Custom setup done!"
+            echo ""
+
             docker-compose up -d --build && dockerSucess=true
             cd "/${gitdir}" || exit
         ;;
