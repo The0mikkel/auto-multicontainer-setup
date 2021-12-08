@@ -1,6 +1,6 @@
 # Auto multicontainer setup
 Auto multicontainer script, that can easily setup multiple webservers on one server in a docker inverionment, with the help of a nginx reverse proxy.
-The script is currently supporting lamp, wp and Portainer installations.
+The script is currently supporting lamp, wp, php-stack, laravel and Portainer installations.
 
 ***This software has only been tested on Debian, Kali and Ubuntu***
 
@@ -16,6 +16,7 @@ The script is currently supporting lamp, wp and Portainer installations.
 - [The webservers](#The-webservers)
     - [LAMP](#LAMP)
     - [PHP-stack](#PHP-stack)
+    - [Laravel](#Laravel)
     - [WP (Wordpress)](#WP)
     - [Portainer](#Portainer)
 - [Disclaimer](#Disclaimer)
@@ -288,6 +289,12 @@ Root password of the mariadb. Should be very strong.
 
 ##### TIMEZONE
 Timezone of the PHP server and the database, to make sure times a synchronized.
+
+### Laravel
+
+Uses standard configuration of Laravel, with some added elements from [php-stack](PHP-stack).
+
+*More about the Laravel webserver will come soon*
 
 ### WP
 The Wordpress server is based on the `[wordpress:latest](https://hub.docker.com/_/wordpress)`, but is setup after the [Docker WordPress Production Deployment](https://www.datanovia.com/en/lessons/docker-wordpress-production-deployment/) guide by Alboukadel Kassambara.

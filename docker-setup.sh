@@ -51,4 +51,4 @@ if [ "$reverse_proxy" == "nginx-proxy" ] ; then
 fi
 
 # Run main part of code, to setup containers
-chmod u+x ./scripts/main.sh && sed -i -e 's/\r$//' ./scripts/main.sh && ./scripts/main.sh
+chmod u+x ./scripts/container-setup.sh && sed -i -e 's/\r$//' ./scripts/container-setup.sh && ./scripts/container-setup.sh
